@@ -26,11 +26,11 @@ end
 numFrames = vid.NumberOfFrames;
 pickind='jpg';
 
-% for i = 1:numFrames
-%     frames = read(vid,i);
-%     imwrite(frames,['Image' int2str(i), '.jpg']);
-%     im(i)=image(frames);
-% end
+for i = 1:numFrames
+     frames = read(vid,i);
+     imwrite(frames,['Image' int2str(i), '.jpg']);
+     im(i)=image(frames);
+ end
 
 % Apply Median Filter for smoothening of Image
 for i=1:numFrames
