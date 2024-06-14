@@ -6,7 +6,6 @@ sys.path.append(".")
 sys.path.append(".\\..\\..")
 sys.path.append(".\\..\\utils")
 
-print("Current director = ", os.getcwd())
 
 from utils import show_images, compute_harris_response, detect_corners, save_images, detect_edges, draw_mask, draw_points
 # from ..utils.functions import *
