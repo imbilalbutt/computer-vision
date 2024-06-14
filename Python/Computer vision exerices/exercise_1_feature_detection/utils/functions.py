@@ -17,11 +17,7 @@ def compute_harris_response(I: np.array, k: float = 0.06) -> Tuple[np.array]:
     assert I.dtype == np.float32
 
     # Step 1: Compute Idx and Idy with cv2.Sobel
-    window_name = ('Haris Edge Detector')
-    scale = 1
-    delta = 0
     ddepth = cv2.CV_16S
-    # gray = cv2.cvtColor(I, cv2.COLOR_BGR2GRAY)
 
     # Gradient-X
     Idx = cv2.Sobel(I, ddepth, 1, 0, ksize=3, borderType=cv2.BORDER_DEFAULT)
@@ -76,21 +72,6 @@ def detect_corners(R: np.array, threshold: float = 0.1) -> Tuple[np.array, np.ar
     padded_image = np.pad(R, 1, mode='constant')
 
     # Step 2 (recommended): Create one image for every offset in the 3x3 neighborhood
-    # offset = 3
-    # result = np.zeros([padded_R.shape[0] - (offset - 1), padded_R.shape[1] - (offset - 1)])
-    #
-    # # Iterate over the box filter
-    # for filter_y in range(offset):
-    #     for filter_x in range(offset):
-    #         # Sum up the values covered by the filter in the result image
-    #         result += padded_R[filter_y:filter_y + result.shape[0],
-    #                   filter_x:filter_x + result.shape[1]]
-
-    # offset_images = np.zeros((R.shape[0], R.shape[1]))
-    # for filter_y in range(offset):
-    #     for filter_x in range(offset):
-    #         pass
-
     offsets = [
         padded_image[0:-2, 0:-2],  # Top-left
         padded_image[0:-2, 1:-1],  # Top
@@ -103,8 +84,6 @@ def detect_corners(R: np.array, threshold: float = 0.1) -> Tuple[np.array, np.ar
     ]
 
     # Step 3 (recommended): Compute the greatest neighbor of every pixel
-    # greatest_neighbors = np.amax(result, axis=0)
-    # np.max(H(:))
     max_neighbors = np.maximum.reduce(offsets)
 
     # Step 4 (recommended): Compute a boolean image with only all key-points set to True
@@ -129,13 +108,22 @@ def detect_edges(R: np.array, edge_threshold: float = -0.01) -> np.array:
         A boolean image with edge pixels set to True.
     """
     # Step 1 (recommended): Pad the response image to facilitate vectorization
+    padded_R = np.pad(R, 1, mode='constant')
 
     # Step 2 (recommended): Calculate significant response pixels
+    significant = (R < edge_threshold)
 
     # Step 3 (recommended): Create two images with the smaller x-axis and y-axis neighbors respectively
+    left = padded_R[1:-1, :-2]    # Left neighbor
+    right = padded_R[1:-1, 2:]    # Right neighbor
+    up = padded_R[:-2, 1:-1]      # Top neighbor
+    down = padded_R[2:, 1:-1]     # Bottom neighbor
 
     # Step 4 (recommended): Calculate pixels that are lower than either their x-axis or y-axis neighbors
+    x_minimal = (R < left) & (R < right)
+    y_minimal = (R < up) & (R < down)
 
     # Step 5 (recommended): Calculate valid edge pixels by combining significant and axis_minimal pixels
+    edge_pixels = significant & (x_minimal | y_minimal)
 
-    raise NotImplementedError
+    return edge_pixels
